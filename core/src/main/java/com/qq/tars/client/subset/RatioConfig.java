@@ -27,7 +27,7 @@ public class RatioConfig {
             }
         }
         //routeKey不为空时实现按比例算法(一致hash)
-        return consistentHash.getSubsetByVirtual();
+        return consistentHash.getSubsetByVirtual(routeKey);
     }
 
     public Map<String, Integer> getRules() {

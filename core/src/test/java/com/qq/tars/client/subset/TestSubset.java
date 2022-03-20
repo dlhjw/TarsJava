@@ -154,6 +154,7 @@ public class TestSubset {
         int errTimes = 0;
         for (int i = 0; i < times; i++) {
             //对存活节点按subset规则过滤
+            routeKey = i+"&&routeKey"; //模拟每次请求不同的 routeKe
             Holder<List<EndpointF>> filterActiveEp = subsetFilter.subsetEndpointFilter(objectName, routeKey, activeEp);
             String subsetValue = filterActiveEp.getValue().get(0).getSubset();
             if("v1".equals(subsetValue)){

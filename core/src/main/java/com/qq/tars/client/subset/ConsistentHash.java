@@ -9,7 +9,6 @@ public class ConsistentHash {
 
     SortedMap<Integer, String> virtualSubset;
     RatioConfig ratioConfig;
-    Iterator<SortedMap.Entry<Integer,String>> it;
     SortedMap.Entry<Integer,String> entrySubset;
 
     public ConsistentHash() {
@@ -24,22 +23,28 @@ public class ConsistentHash {
                 virtualSubset.put(hash, virtualSubsetName);
             }
         }
-        Iterator<SortedMap.Entry<Integer,String>> it = virtualSubset.entrySet().iterator();
         this.virtualSubset = virtualSubset;
-        this.it = it;
     }
 
-    public String getSubsetByVirtual(){
-        if(entrySubset == null || !it.hasNext() || it == null){
-            it = virtualSubset.entrySet().iterator();
-            entrySubset = it.next();
-        } else {
-            entrySubset = it.next();
+    public String getSubsetByVirtual(String routeKey){
+        //得到该key的hash值
+        int hash = getHash(routeKey);
+        //得到大于该Hash值的所有Map
+        SortedMap<Integer, String> subMap = virtualSubset.tailMap(hash);
+        if(subMap.isEmpty()){
+            //如果没有比该key的hash值大的，则从第一个node开始
+            Integer i = virtualSubset.firstKey();
+            //返回对应的服务器
+            return virtualSubset.get(i).split("&&")[0];
+        }else{
+            //第一个Key就是顺时针过去离node最近的那个结点
+            Integer i = subMap.firstKey();
+            //返回对应的服务器
+            return subMap.get(i).split("&&")[0];
         }
-        String virtualSubset = entrySubset.getValue();
-        return virtualSubset.split("&&")[0];
     }
 
+    //使用FNV1_32_HASH算法计算服务器的Hash值,这里不使用重写hashCode的方法，最终效果没区别
     private static int getHash(String str){
         final int p = 16777619;
         int hash = (int)2166136261L;
